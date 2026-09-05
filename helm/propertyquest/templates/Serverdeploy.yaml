@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}-server
+  labels:
+    app: {{ .Values.app.name }}-server
+spec:
+  replicas: {{ .Values.server.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}-server
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}-server
+    spec:
+      {{- if .Values.dockerregistry.enabled }}
+      imagePullSecrets:
+        - name: {{ .Values.app.name }}-dockerregistry
+      {{- end }}
+      containers:
+        - name: {{ .Values.app.name }}-server
+          image: {{ .Values.server.image }}:{{ .Values.server.tag }}
+          ports:
+            - name: server-port
+              containerPort: {{ .Values.server.containerPort }}
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: admin_password
+            - name: DB_USER
+              value: {{ .Values.server.defaultUser | quote }}
+            - name: MYSQL_DATABASE
+              value: accounts
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: jwt_secret
+            - name: GOOGLE_CLIENT_ID
+              value: your-google-client-id.apps.googleusercontent.com
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: google_client_secret
+            - name: FB_CLIENT_ID
+              value: your-facebook-client-id
+            - name: FB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: fb_client_secret
+            - name: APPLE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: apple_private_key
+            - name: APPLE_KEY_ID
+              value: your-apple-key-id
+            - name: APPLE_TEAM_ID
+              value: your-apple-team-id
+            - name: APPLE_CLIENT_ID
+              value: your-apple-client-id
+            - name: ADMIN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: admin_secret_key
+            - name: ADMIN_EMAIL
+              value: salihu@gmail.com
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: db-password

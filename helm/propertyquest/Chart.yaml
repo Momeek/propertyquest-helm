@@ -1,0 +1,6 @@
+apiVersion: v2
+name: propertyquest
+description: Helm chart for the PropertyQuest client and server application
+type: application
+version: 0.1.0
+appVersion: "latest"

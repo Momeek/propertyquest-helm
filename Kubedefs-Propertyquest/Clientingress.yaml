@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: propertyquestClient-ingress
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: propertyquest.meeklab.site
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: Client-service
+                port:
+                  number: 3000

@@ -1,0 +1,180 @@
+---
+# Source: propertyquest/templates/Secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: propertyquest-secret
+type: Opaque
+data:
+  jwt_secret: "eW91ci1zZWNyZXQta2V5"
+  google_client_secret: "WU9VUl9HT09HTEVfQ0xJRU5UX1NFQ1JFVA=="
+  fb_client_secret: "eW91cl9mYWNlYm9va19hcHBfc2VjcmV0"
+  apple_private_key: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tbi4uLi5uLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQ=="
+  admin_secret_key: "c2VjcmV0dG9nbw=="
+  admin_password: "MTIzNDU2Nzg="
+---
+# Source: propertyquest/templates/Clientsvc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-service
+spec:
+  type: ClusterIP
+  selector:
+    app: propertyquest-client
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: client-port
+---
+# Source: propertyquest/templates/ServerSvc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-service
+spec:
+  type: ClusterIP
+  selector:
+    app: propertyquest-server
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: server-port
+---
+# Source: propertyquest/templates/Clientdeploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propertyquest-client
+  labels:
+    app: propertyquest-client
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: propertyquest-client
+  template:
+    metadata:
+      labels:
+        app: propertyquest-client
+    spec:
+      initContainers:
+        - name: init-mydb
+          image: busybox:latest
+          command: ["sh","-c","until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql; sleep 2; done"]
+        - name: init-server
+          image: busybox:latest
+          command: ["sh","-c","until nslookup propertyserver-service.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for propertyserver-service; sleep 2; done"]
+      containers:
+        - name: propertyquest-client
+          image: mohmeek/propertyquest-aws-monolithic-frontend:latest
+          ports:
+            - name: client-port
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_PUBLIC_API_URL
+              value: http://server-service:8080/api
+---
+# Source: propertyquest/templates/Serverdeploy.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propertyquest-server
+  labels:
+    app: propertyquest-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: propertyquest-server
+  template:
+    metadata:
+      labels:
+        app: propertyquest-server
+    spec:
+      containers:
+        - name: propertyquest-server
+          image: mohmeek/propertyquest-aws-monolithic-backend:latest
+          ports:
+            - name: server-port
+              containerPort: 8080
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: admin_password
+            - name: DB_USER
+              value: "meek_user"
+            - name: MYSQL_DATABASE
+              value: accounts
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: jwt_secret
+            - name: GOOGLE_CLIENT_ID
+              value: your-google-client-id.apps.googleusercontent.com
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: google_client_secret
+            - name: FB_CLIENT_ID
+              value: your-facebook-client-id
+            - name: FB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: fb_client_secret
+            - name: APPLE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: apple_private_key
+            - name: APPLE_KEY_ID
+              value: your-apple-key-id
+            - name: APPLE_TEAM_ID
+              value: your-apple-team-id
+            - name: APPLE_CLIENT_ID
+              value: your-apple-client-id
+            - name: ADMIN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: admin_secret_key
+            - name: ADMIN_EMAIL
+              value: salihu@gmail.com
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: admin_password
+---
+# Source: propertyquest/templates/Clientingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: propertyquest-client-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: <Enter Your Certificate ARN>
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  rules:
+    - host: propertyquest.meeklab.site
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-service
+                port:
+                  number: 3000

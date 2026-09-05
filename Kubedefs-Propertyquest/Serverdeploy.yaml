@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propertyquestserver
+  labels:
+    app: propertyquestserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: propertyquestserver
+  template:
+    metadata:
+      labels:
+        app: propertyquestserver
+    spec:
+      containers:
+        - name: propertyquestserver-container
+          image: mohmeek/propertyquest-aws-monolithic-backend
+          ports:
+            - containerPort: 8080
+              name: server-port
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: db-password
+            - name: DB_USER
+              value: "meek_user"
+
+            - name: MYSQL_DATABASE
+              value: "accounts"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: jwt_secret
+
+            - name: GOOGLE_CLIENT_ID
+              value: "your-google-client-id.apps.googleusercontent.com"
+
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: google_client_secret
+
+            - name: FB_CLIENT_ID
+              value: "your-facebook-client-id"
+
+            - name: FB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: fb_client_secret
+
+            - name: APPLE_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: apple_private_key
+
+            - name: APPLE_KEY_ID
+              value: "your-apple-key-id"
+
+            - name: APPLE_TEAM_ID
+              value: "your-apple-team-id"
+
+            - name: APPLE_CLIENT_ID
+              value: "your-apple-client-id"
+
+            - name: ADMIN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: admin_secret_key
+
+            - name: ADMIN_EMAIL
+              value: "salihu@gmail.com"
+
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: propertyquest-secret
+                  key: admin_password

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: propertyquestClient
+  labels:
+    app: propertyquestClient
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: propertyquestClient
+  template:
+    metadata:
+      labels:
+        app: propertyquestClient
+    spec:
+      containers:
+        - name: propertyquestClient-container
+          image: mohmeek/propertyquest-aws-monolithic-frontend
+          ports:
+            - containerPort: 3000
+              name: client-port
+          env:
+            - name: NODE_ENV
+              value: "production"
+
+            - name: NEXT_PUBLIC_API_URL
+              value: http://localhost:8080/api
+      initContainers:
+        - name: init-mydb
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for propertydb-service; sleep 2; done",
+            ]
+        - name: init-server
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup propertyserver-service.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for propertyserver-service; sleep 2; done",
+            ]

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}-client
+  labels:
+    app: {{ .Values.app.name }}-client
+spec:
+  replicas: {{ .Values.client.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}-client
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}-client
+    spec:
+      {{- if .Values.dockerregistry.enabled }}
+      imagePullSecrets:
+        - name: {{ .Values.app.name }}-dockerregistry
+      {{- end }}
+      {{- if .Values.initcontainers.enabled }}
+      initContainers:
+        - name: init-mydb
+          image: {{ .Values.initcontainers.image }}:{{ .Values.initcontainers.tag }}
+          command: {{ toJson .Values.initcontainers.databaseCommand }}
+        - name: init-server
+          image: {{ .Values.initcontainers.image }}:{{ .Values.initcontainers.tag }}
+          command: {{ toJson .Values.initcontainers.serverCommand }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.app.name }}-client
+          image: {{ .Values.client.image }}:{{ .Values.client.tag }}
+          ports:
+            - name: client-port
+              containerPort: {{ .Values.client.containerPort }}
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.client.defaultUser | quote }}
+            - name: NEXT_PUBLIC_API_URL
+              value: http://server-service:{{ .Values.server.servicePort }}/api
