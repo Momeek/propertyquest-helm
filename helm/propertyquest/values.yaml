@@ -56,3 +56,9 @@ database:
   user: propertyquest_app
   ssl: true
   sslRejectUnauthorized: true
+
+migration:
+  enabled: true
+  backoffLimit: 3
+  command: ["npx"]
+  args: ["sequelize-cli", "db:migrate"]

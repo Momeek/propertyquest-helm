@@ -1,0 +1,45 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.app.name }}-migration-{{ .Release.Revision }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}-migration
+    spec:
+      restartPolicy: Never
+      {{- if .Values.dockerregistry.enabled }}
+      imagePullSecrets:
+        - name: {{ .Values.app.name }}-dockerregistry
+      {{- end }}
+      containers:
+        - name: database-migration
+          image: {{ .Values.server.image }}:{{ .Values.server.tag }}
+          command: {{ toJson .Values.migration.command }}
+          args: {{ toJson .Values.migration.args }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | default 3306 | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_USER
+              value: {{ .Values.database.user | quote }}
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.name }}-secret
+                  key: db-password
+            - name: DB_SSL
+              value: {{ .Values.database.ssl | default true | quote }}
+            - name: DB_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.database.sslRejectUnauthorized | default true | quote }}
+{{- end }}
