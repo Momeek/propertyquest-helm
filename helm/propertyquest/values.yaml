@@ -1,3 +1,6 @@
+app:
+  name: propertyquest
+
 server:
   image: mohmeek/propertyquest-aws-monolithic-backend
   tag: latest
@@ -18,12 +21,6 @@ initcontainers:
   enabled: true
   image: busybox
   tag: latest
-  databaseCommand:
-    [
-      "sh",
-      "-c",
-      "until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql; sleep 2; done",
-    ]
   serverCommand:
     [
       "sh",
@@ -37,6 +34,7 @@ ingress:
   servicePort: 3000
 
 secrets:
+  dbPassword: MTIzNDU2Nzg=
   jwtSecret: eW91ci1zZWNyZXQta2V5
   googleClientSecret: WU9VUl9HT09HTEVfQ0xJRU5UX1NFQ1JFVA==
   facebookClientSecret: eW91cl9mYWNlYm9va19hcHBfc2VjcmV0
@@ -50,3 +48,11 @@ dockerregistry:
   username: ""
   password: ""
   email: ""
+
+database:
+  host: your-rds-instance.xxxxxxxxxxxx.us-east-1.rds.amazonaws.com
+  port: 3306
+  name: propertyquest
+  user: propertyquest_app
+  ssl: true
+  sslRejectUnauthorized: true

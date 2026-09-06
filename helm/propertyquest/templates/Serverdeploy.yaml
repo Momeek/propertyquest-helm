@@ -25,20 +25,25 @@ spec:
             - name: server-port
               containerPort: {{ .Values.server.containerPort }}
           env:
+            - name: DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: DB_PORT
+              value: {{ .Values.database.port | default 3306 | quote }}
+            - name: DB_NAME
+              value: {{ .Values.database.name | quote }}
+            - name: DB_USER
+              value: {{ .Values.database.user | quote }}
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.app.name }}-secret
-                  key: admin_password
-            - name: DB_USER
-              value: {{ .Values.server.defaultUser | quote }}
-            - name: MYSQL_DATABASE
-              value: accounts
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: jwt_secret
+                  key: db-password
+            - name: DB_SSL
+              value: {{ .Values.database.ssl | default true | quote }}
+            - name: DB_SSL_REJECT_UNAUTHORIZED
+              value: {{ .Values.database.sslRejectUnauthorized | default true | quote }}
+            - name: DB_LOGGING
+              value: "false"
             - name: GOOGLE_CLIENT_ID
               value: your-google-client-id.apps.googleusercontent.com
             - name: GOOGLE_CLIENT_SECRET
@@ -75,4 +80,4 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.app.name }}-secret
-                  key: db-password
+                  key: admin_password
