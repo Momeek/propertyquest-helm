@@ -58,7 +58,7 @@ database:
   sslRejectUnauthorized: true
 
 migration:
-  enabled: false
+  enabled: true
   backoffLimit: 3
   command: ["npx"]
   args: ["sequelize-cli", "db:migrate"]
