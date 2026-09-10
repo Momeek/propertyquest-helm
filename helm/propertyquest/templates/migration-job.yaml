@@ -15,10 +15,6 @@ spec:
         app: {{ .Values.app.name }}-migration
     spec:
       restartPolicy: Never
-      {{- if .Values.dockerregistry.enabled }}
-      imagePullSecrets:
-        - name: {{ .Values.app.name }}-dockerregistry
-      {{- end }}
       containers:
         - name: database-migration
           image: {{ .Values.server.image }}:{{ .Values.server.tag }}
