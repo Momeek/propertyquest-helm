@@ -8,6 +8,12 @@ server:
   containerPort: 8080
   servicePort: 8080
   defaultUser: meek_user
+  googleClientId: "your-real-google-client-id.apps.googleusercontent.com"
+  fbClientId: "your-real-facebook-client-id"
+  appleKeyId: "your-real-apple-key-id"
+  appleTeamId: "your-real-apple-team-id"
+  appleClientId: "your-real-apple-client-id"
+  adminEmail: "salihu@gmail.com"
 
 client:
   image: mohmeek/propertyquest-aws-monolithic-frontend
@@ -32,22 +38,6 @@ ingress:
   enabled: true
   host: propertyquest.meeklab.site
   servicePort: 3000
-
-secrets:
-  dbPassword: MTIzNDU2Nzg=
-  jwtSecret: eW91ci1zZWNyZXQta2V5
-  googleClientSecret: WU9VUl9HT09HTEVfQ0xJRU5UX1NFQ1JFVA==
-  facebookClientSecret: eW91cl9mYWNlYm9va19hcHBfc2VjcmV0
-  applePrivateKey: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tbi4uLi5uLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQ==
-  adminSecretKey: c2VjcmV0dG9nbw==
-  adminPassword: MTIzNDU2Nzg=
-
-dockerregistry:
-  enabled: false
-  server: index.docker.io
-  username: ""
-  password: ""
-  email: ""
 
 database:
   host: propertyquest-db.cchii46suxaz.us-east-1.rds.amazonaws.com
