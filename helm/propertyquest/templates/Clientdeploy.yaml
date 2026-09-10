@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}-client
-  
+    spec:
       {{- if .Values.initcontainers.enabled }}
       initContainers:
         - name: init-server
