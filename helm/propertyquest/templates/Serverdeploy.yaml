@@ -14,16 +14,15 @@ spec:
       labels:
         app: {{ .Values.app.name }}-server
     spec:
-      {{- if .Values.dockerregistry.enabled }}
-      imagePullSecrets:
-        - name: {{ .Values.app.name }}-dockerregistry
-      {{- end }}
       containers:
         - name: {{ .Values.app.name }}-server
           image: {{ .Values.server.image }}:{{ .Values.server.tag }}
           ports:
             - name: server-port
               containerPort: {{ .Values.server.containerPort }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.app.name }}-secret
           env:
             - name: DB_HOST
               value: {{ .Values.database.host | quote }}
@@ -33,11 +32,6 @@ spec:
               value: {{ .Values.database.name | quote }}
             - name: DB_USER
               value: {{ .Values.database.user | quote }}
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: db-password
             - name: DB_SSL
               value: {{ .Values.database.ssl | default true | quote }}
             - name: DB_SSL_REJECT_UNAUTHORIZED
@@ -45,39 +39,14 @@ spec:
             - name: DB_LOGGING
               value: "false"
             - name: GOOGLE_CLIENT_ID
-              value: your-google-client-id.apps.googleusercontent.com
-            - name: GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: google_client_secret
+              value: {{ .Values.server.googleClientId | quote }}
             - name: FB_CLIENT_ID
-              value: your-facebook-client-id
-            - name: FB_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: fb_client_secret
-            - name: APPLE_PRIVATE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: apple_private_key
+              value: {{ .Values.server.fbClientId | quote }}
             - name: APPLE_KEY_ID
-              value: your-apple-key-id
+              value: {{ .Values.server.appleKeyId | quote }}
             - name: APPLE_TEAM_ID
-              value: your-apple-team-id
+              value: {{ .Values.server.appleTeamId | quote }}
             - name: APPLE_CLIENT_ID
-              value: your-apple-client-id
-            - name: ADMIN_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: admin_secret_key
+              value: {{ .Values.server.appleClientId | quote }}
             - name: ADMIN_EMAIL
-              value: salihu@gmail.com
-            - name: ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: admin_password
+              value: {{ .Values.server.adminEmail | quote }}

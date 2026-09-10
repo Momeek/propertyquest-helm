@@ -13,10 +13,7 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}-client
-    spec:
-      {{- if .Values.dockerregistry.enabled }}
-      imagePullSecrets:
-        - name: {{ .Values.app.name }}-dockerregistry
+  
       {{- end }}
       {{- if .Values.initcontainers.enabled }}
       initContainers:
