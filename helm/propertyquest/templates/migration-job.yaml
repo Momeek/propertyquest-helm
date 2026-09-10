@@ -17,9 +17,12 @@ spec:
       restartPolicy: Never
       containers:
         - name: database-migration
-          image: {{ .Values.server.image }}:{{ .Values.server.tag }}
-          command: {{ toJson .Values.migration.command }}
-          args: {{ toJson .Values.migration.args }}
+          image: ...
+          command: ["npx"]
+          args: ["sequelize-cli", "db:migrate"]
+    envFrom:
+      - secretRef:
+          name: {{ .Values.app.name }}-secret
           env:
             - name: DB_HOST
               value: {{ .Values.database.host | quote }}
@@ -28,12 +31,7 @@ spec:
             - name: DB_NAME
               value: {{ .Values.database.name | quote }}
             - name: DB_USER
-              value: {{ .Values.database.user | quote }}
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.name }}-secret
-                  key: db-password
+              value: {{ .Values.database.user | quote }}    
             - name: DB_SSL
               value: {{ .Values.database.ssl | default true | quote }}
             - name: DB_SSL_REJECT_UNAUTHORIZED
