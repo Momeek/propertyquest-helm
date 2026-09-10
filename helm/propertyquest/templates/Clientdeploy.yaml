@@ -14,7 +14,6 @@ spec:
       labels:
         app: {{ .Values.app.name }}-client
   
-      {{- end }}
       {{- if .Values.initcontainers.enabled }}
       initContainers:
         - name: init-server
