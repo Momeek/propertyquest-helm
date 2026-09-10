@@ -24,7 +24,12 @@ initcontainers:
   enabled: true
   image: busybox
   tag: latest
-  serverCommand: ["sh", "-c", "until nslookup server-service.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for server-service; sleep 2; done"]
+  serverCommand:
+    [
+      "sh",
+      "-c",
+      "until nslookup server-service.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for server-service; sleep 2; done",
+    ]
 ingress:
   enabled: true
   host: propertyquest.meeklab.site
