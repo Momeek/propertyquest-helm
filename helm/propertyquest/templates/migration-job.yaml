@@ -20,9 +20,9 @@ spec:
           image: ...
           command: ["npx"]
           args: ["sequelize-cli", "db:migrate"]
-    envFrom:
-      - secretRef:
-          name: {{ .Values.app.name }}-secret
+          envFrom:
+            - secretRef:
+                 name: {{ .Values.app.name }}-secret
           env:
             - name: DB_HOST
               value: {{ .Values.database.host | quote }}
