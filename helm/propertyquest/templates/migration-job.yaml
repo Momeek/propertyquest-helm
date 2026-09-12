@@ -17,12 +17,12 @@ spec:
       restartPolicy: Never
       containers:
         - name: database-migration
-          image: ...
+          image: {{ .Values.app.image }}:{{ .Values.app.tag }}
           command: ["npx"]
           args: ["sequelize-cli", "db:migrate"]
           envFrom:
             - secretRef:
-                 name: {{ .Values.app.name }}-secret
+                name: {{ .Values.app.name }}-secret
           env:
             - name: DB_HOST
               value: {{ .Values.database.host | quote }}
