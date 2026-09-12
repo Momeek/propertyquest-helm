@@ -17,7 +17,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: database-migration
-          image: {{ .Values.app.image }}:{{ .Values.app.tag }}
+          image: "{{ .Values.server.image }}:{{ .Values.server.tag }}"
           command: ["npx"]
           args: ["sequelize-cli", "db:migrate"]
           envFrom:
