@@ -45,4 +45,4 @@ migration:
   enabled: true
   backoffLimit: 3
   command: ["npx"]
-  args: ["sequelize-cli", "db:migrate"]
+  args: ["sequelize-cli", "db:migrate", "--env", "production"]
