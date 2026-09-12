@@ -40,7 +40,7 @@ database:
   name: propertyquest
   user: propertyquest_app
   ssl: true
-  sslRejectUnauthorized: true
+  sslRejectUnauthorized: false
 migration:
   enabled: true
   backoffLimit: 3
