@@ -1,4 +1,4 @@
-# PropertyQuest Helm Chart
+# PropertyQuest Helm Chart!S
 
 Helm chart for deploying the PropertyQuest client and server application on Kubernetes.
 
